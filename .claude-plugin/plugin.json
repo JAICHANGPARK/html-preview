@@ -1,0 +1,48 @@
+{
+  "name": "html-preview",
+  "version": "0.1.0",
+  "description": "Opens HTML files Claude writes (or /preview <file>) in terminal-browser",
+  "author": {
+    "name": "JAICHANGPARK"
+  },
+  "license": "MIT",
+  "keywords": [
+    "html",
+    "preview",
+    "terminal-browser",
+    "function-hooks"
+  ],
+  "userConfig": {
+    "mode": {
+      "type": "string",
+      "title": "Where to show the page",
+      "description": "pane: the terminal-browser plugin's pane inside Claude Code; split: a terminal split via the terminal-browser CLI; auto: pane when that plugin is installed, else split",
+      "default": "auto",
+      "options": [
+        "auto",
+        "pane",
+        "split"
+      ]
+    },
+    "split": {
+      "type": "string",
+      "title": "Split direction",
+      "description": "Direction for the CLI split (mode split, or auto without the plugin)",
+      "default": "right",
+      "options": [
+        "right",
+        "left",
+        "down",
+        "up"
+      ]
+    },
+    "autoOpen": {
+      "type": "boolean",
+      "title": "Auto-open written HTML",
+      "description": "Preview each .html file the Write or Edit tool saves",
+      "default": true
+    }
+  },
+  "homepage": "https://github.com/JAICHANGPARK/html-preview",
+  "repository": "https://github.com/JAICHANGPARK/html-preview"
+}

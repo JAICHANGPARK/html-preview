@@ -1,0 +1,13 @@
+{
+  "name": "html-preview",
+  "owner": { "name": "JAICHANGPARK" },
+  "metadata": { "description": "Preview HTML in terminal-browser from Claude Code" },
+  "plugins": [
+    {
+      "name": "html-preview",
+      "source": "./",
+      "description": "Opens HTML files Claude writes (or /preview <file>) in terminal-browser",
+      "license": "MIT"
+    }
+  ]
+}
