@@ -97,7 +97,7 @@ When the `Write` or `Edit` tool saves a `*.html` / `*.htm` file, the page opens.
 
 - **자동:** Claude가 `Write`/`Edit` 도구로 `.html`/`.htm` 파일을 저장하면 페이지가 바로 열립니다. 다시 수정하면 새 버전으로 다시 열립니다. 예: "이 저장소 구조를 `report.html` 한 페이지 리포트로 만들어 줘."
 - **수동:** `/preview report.html` (파일), `/preview https://example.com` (URL), `/preview` (마지막 페이지 다시 보기), `/preview setup` (terminal-browser 확인·설치. 설치 전에 먼저 물어봅니다)
-- **내장 pane 단축키:** `k`/`j` 위·아래 스크롤, `t` 맨 위, `r` 다시 렌더링, `x` 닫기
+- **내장 pane:** 마우스 휠·트랙패드로 페이지 스크롤(스크롤할 때마다 다시 렌더링해서 1초쯤 걸림), `k`/`j` 위·아래 스크롤, `t` 맨 위, `r` 다시 렌더링, `x` 닫기
 - **설정:** `/config`에서 `mode`(`auto`, `pane`, `split`, `builtin`), `split` 방향, `autoOpen`, `chromePath`를 바꿀 수 있습니다.
 
 `auto` 모드에서 terminal-browser가 없으면 내장 렌더러로 보여 줍니다. `split`/`pane` 모드에서는 설치 안내를 띄우고, Homebrew로 설치할지 먼저 물어봅니다. 묻지 않고 설치하지는 않습니다.
@@ -113,7 +113,8 @@ When the `Write` or `Edit` tool saves a `*.html` / `*.htm` file, the page opens.
 
 ### The built-in renderer
 
-- Headless Chrome renders the page at 1280×800 and the pane draws the screenshot with the kitty graphics protocol.
+- Headless Chrome renders the page 1280px wide, at a height that fits the pane, and the pane draws the screenshot with the kitty graphics protocol.
+- The mouse wheel or trackpad over the pane scrolls the page. Each scroll renders again, so it takes about a second to catch up.
 - Buttons in the pane: `↑` (`k`) and `↓` (`j`) scroll by 600px, `top` (`t`), `reload` (`r`), `close` (`x`).
 - Each save of the file renders it again.
 - It is a picture: links, forms and scripts that need clicks do not work. Use terminal-browser for that.

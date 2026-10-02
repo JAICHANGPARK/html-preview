@@ -2,7 +2,7 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, PluginOptions, Register } from 'claude-code'
 
 import type { Page } from '../types'
-import { CHROMES, SCHEME, VIEW, fileUrl, htmlToMarkdown, wrap } from './builtin'
+import { CELL_RATIO, CHROMES, FIT_SLACK, SCHEME, VIEW, fileUrl, fitHeight, htmlToMarkdown, wrap } from './builtin'
 
 // The noun the terminal-browser Claude Code plugin adds to `$`
 // (zenbu-labs/terminal-browser, claude-code-plugin/hooks/browser.d.ts).
@@ -15,8 +15,8 @@ type WithBrowser = EngineInterface & { browser: Browser }
 const HTML = /\.html?$/i
 const PANE = 'html-preview'
 const STEP = 600
-// A terminal cell is about half as wide as it is tall.
-const CELL_RATIO = 0.5
+// CSS pixels per wheel tick.
+const WHEEL = 120
 const BREW = 'Install with Homebrew'
 const INSTALL_HELP = [
   'terminal-browser is not installed. Install it, then try again:',
@@ -63,6 +63,7 @@ async function screenshot(
   chrome: string,
   target: string,
   scrollY: number,
+  height: number,
   generation: number,
 ): Promise<string> {
   const dir = await workDir($)
@@ -85,7 +86,7 @@ async function screenshot(
       '--no-default-browser-check',
       `--user-data-dir=${profile}`,
       `--screenshot=${png}`,
-      `--window-size=${VIEW.width},${VIEW.height}`,
+      `--window-size=${VIEW.width},${height}`,
       '--virtual-time-budget=1500',
       url,
     ],
@@ -189,8 +190,9 @@ async function renderOnce($: EngineInterface, options: PluginOptions): Promise<v
       await land({ text, status: 'error', error: 'Chrome/Chromium not found: showing the page as text' })
       return
     }
-    const png = await screenshot($, chrome, current.target, current.scrollY, generation)
-    await land({ png, generation, text, status: 'ready', error: undefined })
+    const height = current.height ?? VIEW.height
+    const png = await screenshot($, chrome, current.target, current.scrollY, height, generation)
+    await land({ png, generation, rendered: height, text, status: 'ready', error: undefined })
   } catch (err) {
     await land({ status: 'error', error: String(err) })
   }
@@ -277,6 +279,17 @@ export const register: Register = (on, options: PluginOptions) => {
     return ran
   })
 
+  // The wheel scrolls the page, not the pane: each tick moves the screenshot
+  // and renders again. Bursts of ticks fold into one render.
+  on('ui.scroll', { component: 'Pane', requestId: PANE }, async ($, e) => {
+    const shown = await read($, page)
+    if (!shown?.png || e.by === 0) return {}
+    await update($, page, p => (p ? { ...p, scrollY: Math.max(0, p.scrollY + e.by * WHEEL), status: 'rendering' as const } : p))
+    renderLater($, options)
+
+    return {}
+  })
+
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Button, Markdown, Text } = $.ui.resolve(e)
     const shown = await read($, page)
@@ -306,9 +319,17 @@ export const register: Register = (on, options: PluginOptions) => {
 
     if (e.surface === 'terminal' && shown.png) {
       const { Image } = $.ui.resolve(e)
-      const ratio = (VIEW.height / VIEW.width) * CELL_RATIO
       const room = Math.max(4, Math.min(255, e.props.scroll.bodyRows - 2))
       let columns = Math.max(1, Math.min(255, e.props.bodyColumns))
+      // Render the page at the pane's shape, so the picture fills it.
+      const fitted = fitHeight(columns, room)
+      if (Math.abs(fitted - (shown.height ?? VIEW.height)) >= FIT_SLACK) {
+        $.clock.after(0, async () => {
+          await update($, page, p => (p ? { ...p, height: fitted, status: 'rendering' as const } : p))
+          void render($, options)
+        })
+      }
+      const ratio = ((shown.rendered ?? VIEW.height) / VIEW.width) * CELL_RATIO
       let rows = Math.max(1, Math.round(columns * ratio))
       if (rows > room) {
         rows = room

@@ -8,6 +8,10 @@ export type Page = {
   generation: number
   /** Scroll offset in CSS pixels. */
   scrollY: number
+  /** Viewport height in CSS pixels, fitted to the pane; the width is fixed. */
+  height?: number
+  /** The viewport height the current `png` was taken at. */
+  rendered?: number
   /** The page as markdown, for surfaces without Image or without Chrome. */
   text?: string
   status: 'rendering' | 'ready' | 'error'

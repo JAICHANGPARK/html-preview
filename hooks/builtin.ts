@@ -2,6 +2,20 @@
 // as an Image). Everything that calls `$` lives in register.tsx.
 
 export const VIEW = { width: 1280, height: 800 }
+// A terminal cell is about half as wide as it is tall.
+export const CELL_RATIO = 0.5
+// Viewport heights the pane may ask for, and the change worth a new render.
+const MIN_HEIGHT = 400
+const MAX_HEIGHT = 4000
+export const FIT_SLACK = 50
+
+/** The viewport height whose screenshot fills `columns` x `rows` cells. */
+export function fitHeight(columns: number, rows: number): number {
+  const height = (VIEW.width * rows) / (columns * CELL_RATIO)
+
+  return Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, Math.round(height / FIT_SLACK) * FIT_SLACK))
+}
+
 export const SCHEME = /^[a-z][a-z0-9+.-]*:/i
 
 export const CHROMES = [
