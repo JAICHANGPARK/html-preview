@@ -23,6 +23,26 @@ describe('html-preview', () => {
     expect(toasts[0]).toContain('Opened /work/plan.html')
   })
 
+  test('auto mode with Chrome shows a written .html file in the Claude Code pane', async ($, on) => {
+    const runs: (readonly string[])[] = []
+    const opened: string[] = []
+    on('tool.call', () => ({ result: { type: 'create', filePath: PAGE, content: '', structuredPatch: [], originalFile: null } } as never))
+    on('fs.stat', () => ({ value: { kind: 'file', size: 10, mtimeMs: 0 } } as never))
+    on('process.run', (_$, e) => {
+      runs.push(e.argv)
+      return { value: { exitCode: 0, stdout: '', stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }
+    })
+    on('ui.open', (_$, e) => {
+      opened.push(e.id)
+      return { value: { isPlaced: true } }
+    })
+
+    await $.tool.call({ tool: 'Write', file_path: PAGE, content: '<h1>hi</h1>' })
+
+    expect(opened).toEqual(['html-preview'])
+    expect(runs.some(argv => argv[0] === 'terminal-browser')).toBe(false)
+  })
+
   test('other files are left alone', { options: { mode: 'split' } }, async ($, on) => {
     const runs: (readonly string[])[] = []
     on('tool.call', () => ({ result: { type: 'create', filePath: '/work/a.ts', content: '', structuredPatch: [], originalFile: null } } as never))

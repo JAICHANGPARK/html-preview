@@ -227,6 +227,9 @@ async function preview($: EngineInterface, raw: string, options: PluginOptions):
     if (mode === 'pane') return opened ? opened.error : PLUGIN_HELP
   }
 
+  // auto keeps the page in a Claude Code pane: the built-in renderer when
+  // Chrome is there, the CLI split only when it is not.
+  if (mode === 'auto' && (await findChrome($, String(options.chromePath ?? '')))) return showBuiltin($, target, options)
   if (await has($, 'terminal-browser')) return openInSplit($, target, split)
   if (mode === 'auto') return showBuiltin($, target, options)
 

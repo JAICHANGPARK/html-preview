@@ -2,9 +2,9 @@
 
 A Claude Code mod that shows HTML like a browser. When Claude writes or edits a `.html` file, the page opens right away, so a generated report or plan reads like a page in a browser.
 
-It uses [terminal-browser](https://github.com/zenbu-labs/terminal-browser) when that is installed. Without it, a built-in renderer takes a screenshot of the page with headless Chrome and shows it in a Claude Code pane.
+By default the page shows in a Claude Code pane: the terminal-browser plugin's pane when that is installed, otherwise a built-in renderer that takes a screenshot of the page with headless Chrome. Set `mode` to `split` to open [terminal-browser](https://github.com/zenbu-labs/terminal-browser) in a terminal split instead.
 
-Claude가 `.html` 파일을 만들거나 수정하면 브라우저처럼 바로 보여 주는 Claude Code mod입니다. terminal-browser가 있으면 그것을 쓰고, 없으면 내장 렌더러(headless Chrome 스크린샷)로 Claude Code pane에 보여 줍니다.
+Claude가 `.html` 파일을 만들거나 수정하면 브라우저처럼 바로 보여 주는 Claude Code mod입니다. 기본으로 Claude Code pane 안에 보여 줍니다: terminal-browser 플러그인이 있으면 그 pane, 없으면 내장 렌더러(headless Chrome 스크린샷). 터미널 분할 창의 terminal-browser로 열려면 `mode`를 `split`으로 바꾸세요.
 
 ## Requirements
 
@@ -70,7 +70,7 @@ When the `Write` or `Edit` tool saves a `*.html` / `*.htm` file, the page opens.
 
 ### When terminal-browser is not installed
 
-- In `auto` mode, the built-in renderer shows the page. Nothing is asked.
+- In `auto` mode, the built-in renderer's pane shows the page. Nothing is asked.
 - In `split` or `pane` mode, the transcript shows one line with the install command at session start. When a page should open, the mod asks if it can install terminal-browser with Homebrew. It never installs without asking. Without Homebrew, or if you say no, it shows the commands:
   ```bash
   brew install terminal-browser
@@ -106,7 +106,7 @@ When the `Write` or `Edit` tool saves a `*.html` / `*.htm` file, the page opens.
 
 | `mode` | Behaviour |
 | --- | --- |
-| `auto` (default) | Tries, in order: the terminal-browser plugin's pane inside Claude Code (`$.browser.open`), a terminal split with `terminal-browser open <file> --split <dir>`, then the built-in renderer. |
+| `auto` (default) | Keeps the page inside Claude Code. Tries, in order: the terminal-browser plugin's pane (`$.browser.open`), the built-in renderer's pane when Chrome is installed, then a terminal split with `terminal-browser open <file> --split <dir>`. |
 | `pane` | Uses only the terminal-browser plugin's pane. |
 | `split` | Uses only the CLI split. |
 | `builtin` | Uses only the built-in renderer, even when terminal-browser is installed. |
