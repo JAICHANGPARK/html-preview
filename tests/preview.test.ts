@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'claude-code/testing'
+import { describe, expect, mock, test } from 'claude-code/testing'
 
 const PAGE = '/work/plan.html'
 
@@ -39,9 +39,10 @@ describe('html-preview', () => {
   test('a missing terminal-browser is explained, not installed unasked', { options: { mode: 'split' } }, async ($, on) => {
     const runs: (readonly string[])[] = []
     on('tool.call', () => ({ deny: 'dismissed' }))
+    on('fs.stat', () => ({ value: { kind: 'file', size: 10, mtimeMs: 0 } } as never))
     on('process.run', (_$, e) => {
       runs.push(e.argv)
-      const isMissing = e.argv[2] === 'command -v terminal-browser'
+      const isMissing = e.argv[2] === "command -v 'terminal-browser'"
       return { value: { exitCode: isMissing ? 1 : 0, stdout: '', stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }
     })
 
@@ -49,6 +50,22 @@ describe('html-preview', () => {
 
     expect(ran.text).toContain('brew install terminal-browser')
     expect(runs.some(argv => argv[0] === 'brew' || argv[0] === 'terminal-browser')).toBe(false)
+  })
+
+  test('builtin mode without Chrome shows the page as text in a pane', { options: { mode: 'builtin' } }, async ($, on) => {
+    const clock = mock.clock(on)
+    on('fs.stat', (_$, e) => (e.path === PAGE ? { value: { kind: 'file', size: 10, mtimeMs: 0 } } : { deny: 'ENOENT' }) as never)
+    on('fs.read', () => ({ value: '<h1>Plan</h1><p>Ship &amp; test</p>' }))
+    on('process.run', () => ({ value: { exitCode: 1, stdout: '', stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }))
+    on('ui.open', () => ({ value: { isPlaced: true } }))
+
+    const ran = await $.command.run({ command: 'preview', args: PAGE } as never)
+    expect(ran.text).toContain('preview pane')
+    await clock.advance(0)
+
+    const ui = await $.ui.mount({ plugin: 'html-preview', surface: 'terminal', component: 'Pane', requestId: 'html-preview', props: {} as never })
+    expect((await ui.find({ type: 'Markdown' }))?.text).toContain('# Plan')
+    expect(await ui.find({ type: 'Text', text: /Chrome\/Chromium not found/ })).toBeDefined()
   })
 
   test('/preview without a file explains its usage', async $ => {
