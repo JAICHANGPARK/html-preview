@@ -33,6 +33,19 @@ claude plugin install html-preview@html-preview
 
 - **Auto:** when the `Write` or `Edit` tool saves a `*.html` / `*.htm` file, the page opens. A later edit opens it again, so you see the new version.
 - **Manual:** `/preview <file.html | url>`. Relative paths resolve against the session's working directory.
+- **Setup:** `/preview setup` checks for terminal-browser. If it is missing and Homebrew is installed, the mod asks before it runs `brew install terminal-browser`.
+
+### When terminal-browser is not installed
+
+- At session start, the transcript shows one line with the install command.
+- When a page should open, the mod asks if it can install terminal-browser with Homebrew. It never installs without asking. Without Homebrew, or if you say no, it shows the commands:
+  ```bash
+  brew install terminal-browser
+  # or
+  curl -fsSL https://terminal-browser.sh/install | bash
+  ```
+
+terminal-browser가 없으면 세션 시작 시 설치 안내를 띄우고, 페이지를 열 때 Homebrew로 설치할지 먼저 물어봅니다. 묻지 않고 설치하지는 않습니다.
 
 ## How it shows the page
 
