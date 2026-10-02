@@ -8,35 +8,65 @@ Claude가 `.html` 파일을 만들거나 수정하면 브라우저처럼 바로 
 
 ## Requirements
 
-- Claude Code with function hooks enabled. Add this to `~/.claude/settings.json`:
-  ```json
-  { "env": { "CLAUDE_CODE_ENABLE_FUNCTION_HOOKS": "1" } }
-  ```
+- Claude Code v2.1.287 or later (`claude --version`). Mods are on by default.
 - A terminal with the kitty graphics protocol, such as Ghostty or kitty.
 - One of these:
-  - [terminal-browser](https://terminal-browser.com), for a real, interactive browser:
-    ```bash
-    brew install terminal-browser   # or: curl -fsSL https://terminal-browser.sh/install | bash
-    ```
   - Google Chrome, Chromium, Edge or Brave, for the built-in renderer. Nothing else to install.
-- Optional, for the in-Claude-Code pane: the terminal-browser plugin.
-  ```bash
-  claude plugin marketplace add zenbu-labs/terminal-browser
-  claude plugin install terminal-browser@terminal-browser
-  ```
+  - [terminal-browser](https://terminal-browser.com), for a real, interactive browser.
 
 ## Install
 
+1. Add the marketplace and install the plugin:
+   ```bash
+   claude plugin marketplace add JAICHANGPARK/html-preview
+   claude plugin install html-preview@html-preview
+   ```
+   Or, inside Claude Code: `/plugin marketplace add JAICHANGPARK/html-preview`, then `/plugin install html-preview@html-preview`.
+2. If a session is already open, run `/reload-plugins` in it. Otherwise the mod loads the next time you start Claude Code.
+3. Check that it loaded: `/plugin` shows `mod active · html-preview` under the tabs, and `/preview` prints `Usage: /preview <file.html | url>  ·  /preview setup`.
+4. Optional, for an interactive browser instead of a screenshot:
+   ```bash
+   brew install terminal-browser   # or: curl -fsSL https://terminal-browser.sh/install | bash
+   # the pane inside Claude Code:
+   claude plugin marketplace add zenbu-labs/terminal-browser
+   claude plugin install terminal-browser@terminal-browser
+   ```
+
+Update and uninstall:
+
 ```bash
-claude plugin marketplace add JAICHANGPARK/html-preview
-claude plugin install html-preview@html-preview
+claude plugin marketplace update html-preview   # get the latest version
+claude plugin uninstall html-preview@html-preview
 ```
 
 ## Usage
 
-- **Auto:** when the `Write` or `Edit` tool saves a `*.html` / `*.htm` file, the page opens. A later edit opens it again, so you see the new version.
-- **Manual:** `/preview <file.html | url>`. Relative paths resolve against the session's working directory.
-- **Setup:** `/preview setup` checks for terminal-browser. If it is missing and Homebrew is installed, the mod asks before it runs `brew install terminal-browser`.
+### Auto: Claude writes HTML
+
+Ask Claude for a page, for example:
+
+> Write a one-page HTML report of this repo's structure to `report.html`.
+
+When the `Write` or `Edit` tool saves a `*.html` / `*.htm` file, the page opens. Each later edit opens it again, so you see the new version. Set `autoOpen` to `false` to stop this.
+
+### Manual: `/preview`
+
+| Command | What it does |
+| --- | --- |
+| `/preview report.html` | Shows a file. A relative path resolves against the session's working directory. |
+| `/preview https://example.com` | Shows a URL. |
+| `/preview` | Shows the last page again. Before any page, it prints the usage. |
+| `/preview setup` | Checks for terminal-browser. If it is missing and Homebrew is installed, it asks before it runs `brew install terminal-browser`. |
+
+### In the built-in pane
+
+| Key | Button | Action |
+| --- | --- | --- |
+| `k` | `↑` | Scroll up 600px |
+| `j` | `↓` | Scroll down 600px |
+| `t` | `top` | Go to the top |
+| `r` | `reload` | Render again |
+| `x` | `close` | Close the pane |
 
 ### When terminal-browser is not installed
 
@@ -47,6 +77,28 @@ claude plugin install html-preview@html-preview
   # or
   curl -fsSL https://terminal-browser.sh/install | bash
   ```
+
+## 설치 방법 (한국어)
+
+1. 마켓플레이스를 추가하고 플러그인을 설치합니다:
+   ```bash
+   claude plugin marketplace add JAICHANGPARK/html-preview
+   claude plugin install html-preview@html-preview
+   ```
+2. 이미 열린 세션이 있으면 `/reload-plugins`를 실행합니다. 아니면 다음에 Claude Code를 시작할 때 로드됩니다.
+3. `/plugin` 화면에 `mod active · html-preview`가 보이고, `/preview`를 입력해 사용법 안내가 나오면 설치된 것입니다.
+4. (선택) 클릭·스크롤이 되는 실제 브라우저가 필요하면 `brew install terminal-browser`로 terminal-browser를 설치합니다.
+
+필요한 것: Claude Code v2.1.287 이상(mod는 기본으로 켜져 있음), kitty 그래픽 프로토콜을 지원하는 터미널(Ghostty, kitty)과 Chrome·Chromium·Edge·Brave 중 하나, 또는 terminal-browser.
+
+업데이트: `claude plugin marketplace update html-preview` · 삭제: `claude plugin uninstall html-preview@html-preview`
+
+## 사용 방법 (한국어)
+
+- **자동:** Claude가 `Write`/`Edit` 도구로 `.html`/`.htm` 파일을 저장하면 페이지가 바로 열립니다. 다시 수정하면 새 버전으로 다시 열립니다. 예: "이 저장소 구조를 `report.html` 한 페이지 리포트로 만들어 줘."
+- **수동:** `/preview report.html` (파일), `/preview https://example.com` (URL), `/preview` (마지막 페이지 다시 보기), `/preview setup` (terminal-browser 확인·설치. 설치 전에 먼저 물어봅니다)
+- **내장 pane 단축키:** `k`/`j` 위·아래 스크롤, `t` 맨 위, `r` 다시 렌더링, `x` 닫기
+- **설정:** `/config`에서 `mode`(`auto`, `pane`, `split`, `builtin`), `split` 방향, `autoOpen`, `chromePath`를 바꿀 수 있습니다.
 
 `auto` 모드에서 terminal-browser가 없으면 내장 렌더러로 보여 줍니다. `split`/`pane` 모드에서는 설치 안내를 띄우고, Homebrew로 설치할지 먼저 물어봅니다. 묻지 않고 설치하지는 않습니다.
 
@@ -84,7 +136,7 @@ Set the options in `/config`, or in `~/.claude/settings.json`:
 
 | Option | Values | Default |
 | --- | --- | --- |
-| `mode` | `auto`, `pane`, `split` | `auto` |
+| `mode` | `auto`, `pane`, `split`, `builtin` | `auto` |
 | `split` | `right`, `left`, `down`, `up` | `right` |
 | `autoOpen` | `true`, `false` | `true` |
 | `chromePath` | path to a Chrome/Chromium binary | empty: found automatically |
@@ -97,7 +149,7 @@ claude plugin test .
 claude --plugin-dir .      # load this checkout in a session
 ```
 
-The function hooks API is early access. A Claude Code release can break this mod.
+Mods need Claude Code v2.1.287 or later. If you set `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS` during early access, remove it: Claude Code ignores it now.
 
 ## License
 
